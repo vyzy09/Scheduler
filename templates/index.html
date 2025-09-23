@@ -111,7 +111,7 @@
       gap: 15px;
     }
 
-    /* Booking popup */
+    /* Popup */
     .popup {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -163,37 +163,37 @@
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
 
-  <h1>📅 Scheduler</h1>
+  <h1>📅 Schedy</h1>
 
   <div class="controls">
     <label for="venue">Choose a venue:</label>
     <select id="venue">
       <option>Gymnasium</option>
-      <option>Auditorium</option>
-      <option>Conference Room</option>
-      <option>Computer Lab</option>
+      <option>Cafet Hall</option>
+      <option>PAT AVR</option>
+      <option>ICT AVR</option>
     </select>
     <button id="openPopup">Add Booking</button>
   </div>
 
   <div class="month-title">
-    <button id="prevMonth">⏮</button>
+    <button id="prevMonth"><</button>
     <span id="monthTitle"></span>
-    <button id="nextMonth">⏭</button>
+    <button id="nextMonth">></button>
   </div>
 
   <div class="calendar" id="calendar"></div>
 
   <!-- Booking Popup -->
   <div class="popup" id="popup">
-    <div class="popup-content">
+    <div class="popup-content" id="popupContent">
       <h2>New Booking</h2>
       <label>Venue:</label>
       <select id="popupVenue">
         <option>Gymnasium</option>
-        <option>Auditorium</option>
-        <option>Conference Room</option>
-        <option>Computer Lab</option>
+        <option>Cafet Hall</option>
+        <option>PAT AVR</option>
+        <option>ICT AVR</option>
       </select><br>
       <label>Date:</label>
       <input type="date" id="popupDate"><br>
@@ -210,19 +210,18 @@
   </div>
 
   <script>
-    // Example bookings per venue
     const bookings = {
       "Gymnasium": {
         "2025-09-05": "Whole Day",
         "2025-09-12": "Morning"
       },
-      "Auditorium": {
+      "PAT AVR": {
         "2025-09-06": "Afternoon"
       },
-      "Conference Room": {
+      "ICT AVR": {
         "2025-09-10": "Whole Day"
       },
-      "Computer Lab": {}
+      "Cafet Hall": {}
     };
 
     let currentMonth = new Date().getMonth();
@@ -253,25 +252,63 @@
           div.title = `${venue} - ${bookings[venue][dateStr]}`;
         }
 
+        // Click event to show booking details
+        div.onclick = () => {
+          const popup = document.getElementById("popup");
+          const popupContent = document.getElementById("popupContent");
+          popup.style.display = "flex";
+
+          // Show details instead of new booking form
+          popupContent.innerHTML = `
+            <h2>Booking Details</h2>
+            <p><b>Venue:</b> ${venue}</p>
+            <p><b>Date:</b> ${dateStr}</p>
+            <p><b>Status:</b> ${bookings[venue][dateStr] || "Vacant"}</p>
+            <button class="close-btn" id="closePopup">Close</button>
+          `;
+
+          document.getElementById("closePopup").onclick = () => {
+            popup.style.display = "none";
+            resetPopupContent(); // restore form
+          };
+        };
+
         calendar.appendChild(div);
       }
     }
 
+    function resetPopupContent() {
+      const popupContent = document.getElementById("popupContent");
+      popupContent.innerHTML = `
+        <h2>New Booking</h2>
+        <label>Venue:</label>
+        <select id="popupVenue">
+          <option>Gymnasium</option>
+          <option>Auditorium</option>
+          <option>Conference Room</option>
+          <option>Computer Lab</option>
+        </select><br>
+        <label>Date:</label>
+        <input type="date" id="popupDate"><br>
+        <label>Time:</label>
+        <select id="popupTime">
+          <option>Whole Day</option>
+          <option>Morning</option>
+          <option>Afternoon</option>
+        </select><br>
+        <div id="suggestion" class="warning"></div>
+        <button id="saveBooking">Save</button>
+        <button class="close-btn" id="closePopup">Close</button>
+      `;
+
+      document.getElementById("closePopup").onclick = () => popup.style.display = "none";
+    }
+
     // Popup handling
     const popup = document.getElementById("popup");
-    document.getElementById("openPopup").onclick = () => popup.style.display = "flex";
-    document.getElementById("closePopup").onclick = () => popup.style.display = "none";
-
-    document.getElementById("popupDate").onchange = () => {
-      const date = document.getElementById("popupDate").value;
-      const venue = document.getElementById("popupVenue").value;
-      const suggestion = document.getElementById("suggestion");
-
-      if (bookings[venue] && bookings[venue][date]) {
-        suggestion.textContent = `⚠️ Already booked (${bookings[venue][date]})`;
-      } else {
-        suggestion.textContent = "";
-      }
+    document.getElementById("openPopup").onclick = () => {
+      resetPopupContent();
+      popup.style.display = "flex";
     };
 
     // Venue change updates calendar
