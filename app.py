@@ -11,6 +11,8 @@ app = Flask(__name__)
 app.secret_key = "replace_this_with_a_strong_secret_in_prod"  # CHANGE for production
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://username:password@localhost/scheduler_db"
 
+print("Database path:", DB_PATH)  # Added print statement to show the database path
+
 # ---------- DB helpers ----------
 def get_db():
     db = getattr(g, "_database", None)
@@ -46,6 +48,15 @@ def init_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     """)
+
+    # Add Venue table
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS venue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        location TEXT NOT NULL
+    )
+    """)
     db.commit()
     db.close()
 
@@ -54,6 +65,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
+            print("Redirecting to login: user not in session")  # Debug print
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
@@ -76,7 +88,9 @@ def index():
     cur = db.execute("SELECT * FROM schedule WHERE user_id = ? ORDER BY date, time", (session["user_id"],))
     tasks = cur.fetchall()
     user = get_user_by_id(session["user_id"])
-    return render_template("index.html", tasks=tasks, user=user)
+    venues_cur = db.execute("SELECT * FROM venue ORDER BY name")
+    venues = venues_cur.fetchall()
+    return render_template("index.html", tasks=tasks, user=user, venues=venues)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -111,6 +125,29 @@ def login():
         flash("Invalid credentials.")
         return redirect(url_for("login"))
     return render_template("login.html")
+
+@app.route("/add_venue", methods=["GET", "POST"])
+def add_venue():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        location = request.form.get("location", "").strip()
+        if not name or not location:
+            flash("Both name and location are required.")
+            return redirect(url_for("add_venue"))
+        db = get_db()
+        db.execute("INSERT INTO venue (name, location) VALUES (?, ?)", (name, location))
+        db.commit() 
+        flash("Venue added successfully.")
+        return redirect(url_for("index"))
+    return render_template("add_venue.html")
+
+@app.route("/venues")
+@login_required
+def list_venues():
+    db = get_db()
+    cur = db.execute("SELECT * FROM venue ORDER BY name")
+    venues = cur.fetchall()
+    return render_template("venues.html", venues=venues)
 
 @app.route("/logout")
 @login_required
@@ -170,7 +207,16 @@ def edit(task_id):
         return redirect(url_for("index"))
     return render_template("edit.html", task=task)
 
+@app.route("/debug_db")
+def debug_db():
+    db = get_db()
+    venues = db.execute("SELECT * FROM venue").fetchall()
+    schedules = db.execute("SELECT * FROM schedule").fetchall()
+    return f"Venues: {venues}<br>Schedules: {schedules}"
+
 # ---------- run ----------
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
+
+# No code changes needed. Use a VS Code SQLite extension to view scheduler.db.
