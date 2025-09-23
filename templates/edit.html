@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Task</h2>
+<form method="post">
+  <label>Title <input name="title" value="{{ task['title'] }}" required></label><br>
+  <label>Date <input type="date" name="date" value="{{ task['date'] }}"></label><br>
+  <label>Time <input type="time" name="time" value="{{ task['time'] }}"></label><br>
+  <label>Notes <input name="notes" value="{{ task['notes'] }}"></label><br>
+  <button type="submit">Save</button>
+  <a href="{{ url_for('index') }}">Cancel</a>
+</form>
+{% endblock %}

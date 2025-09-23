@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 0 1rem; }
+header { display:flex; justify-content:space-between; align-items:center; padding:1rem 0;}
+a { text-decoration: none; margin-left: .5rem; }
+.add-form { margin: 1rem 0; }
+.tasks ul { list-style:none; padding:0; }
+.tasks li { border-bottom:1px solid #ddd; padding: .5rem 0; }
+.actions { margin-top: .5rem; }
+.flashes { color: darkred; }

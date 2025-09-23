@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your Schedule</h2>
+
+<section class="add-form">
+  <form method="post" action="{{ url_for('add') }}">
+    <input name="title" placeholder="Task title" required>
+    <input type="date" name="date">
+    <input type="time" name="time">
+    <input name="notes" placeholder="Notes (optional)">
+    <button type="submit">Add</button>
+  </form>
+</section>
+
+<section class="tasks">
+  {% if tasks %}
+    <ul>
+      {% for t in tasks %}
+        <li>
+          <strong>{{ t["title"] }}</strong>
+          {% if t["date"] %} — {{ t["date"] }}{% endif %}
+          {% if t["time"] %} at {{ t["time"] }}{% endif %}
+          {% if t["notes"] %}<div class="notes">{{ t["notes"] }}</div>{% endif %}
+          <div class="actions">
+            <form method="post" action="{{ url_for('delete', task_id=t['id']) }}" style="display:inline;">
+              <button type="submit" onclick="return confirm('Delete this task?')">Delete</button>
+            </form>
+            <a href="{{ url_for('edit', task_id=t['id']) }}">Edit</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tasks yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
