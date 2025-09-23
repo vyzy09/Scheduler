@@ -11,7 +11,7 @@
     border: none;
     padding: 10px 16px;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(58,66,86,0.10);
+    box-shadow: 0 2px 8px rgba(58, 66, 86, 0.1);
     font-size: 1.5em;
     font-weight: bold;
     cursor: pointer;
@@ -20,7 +20,7 @@
   onmouseover="this.style.background='#e3e7ef';this.style.color='#1a2236';this.style.boxShadow='0 4px 16px rgba(58,66,86,0.18)';"
   onmouseout="this.style.background='#fff';this.style.color='#3a4256';this.style.boxShadow='0 2px 8px rgba(58,66,86,0.10)';"
 >
-  <span style="font-size:1.3em;">&#9776;</span>
+  <span style="font-size: 1.3em">&#9776;</span>
 </button>
 
 <!-- Sidebar Drawer -->
@@ -37,7 +37,7 @@
     /* Blue and yellow gradient */
     padding: 48px 28px 32px 28px;
     box-shadow: 2px 0 24px rgba(185, 79, 198, 0.13);
-    display: flex;
+    display: none; /* Hide sidebar by default */
     flex-direction: column;
     gap: 22px;
     transition: left 0.3s;
@@ -136,20 +136,39 @@
 </div>
 
 <script>
+  // filepath: c:\Users\Admin\Documents\GitHub\Scheduler\templates\sidebar.html
   const sidebar = document.getElementById("sidebarDrawer");
   const toggleBtn = document.getElementById("sidebarToggle");
   let sidebarOpen = false;
 
-  toggleBtn.onclick = function () {
+  toggleBtn.onclick = function (e) {
+    e.stopPropagation();
     sidebarOpen = !sidebarOpen;
-    sidebar.style.left = sidebarOpen ? "0" : "-270px";
+    if (sidebarOpen) {
+      sidebar.style.display = "flex";
+      // Allow transition after display is set
+      setTimeout(() => {
+        sidebar.style.left = "0";
+      }, 10);
+    } else {
+      sidebar.style.left = "-270px";
+      setTimeout(() => {
+        sidebar.style.display = "none";
+      }, 300);
+    }
   };
+
+  sidebar.addEventListener("click", function (e) {
+    e.stopPropagation();
+  });
 
   document.addEventListener("click", function (e) {
     if (sidebarOpen && !sidebar.contains(e.target) && e.target !== toggleBtn) {
       sidebar.style.left = "-270px";
       sidebarOpen = false;
+      setTimeout(() => {
+        sidebar.style.display = "none";
+      }, 300);
     }
   });
-</script>
 </script>
