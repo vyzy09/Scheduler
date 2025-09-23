@@ -128,18 +128,25 @@ def login():
 
 @app.route("/add_venue", methods=["GET", "POST"])
 def add_venue():
+    db = get_db()
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         location = request.form.get("location", "").strip()
         if not name or not location:
             flash("Both name and location are required.")
             return redirect(url_for("add_venue"))
-        db = get_db()
+        # Check if venue already exists
+        cur = db.execute("SELECT * FROM venue WHERE name = ?", (name,))
+        if cur.fetchone():
+            flash("Added Already")
+            return redirect(url_for("add_venue"))
         db.execute("INSERT INTO venue (name, location) VALUES (?, ?)", (name, location))
-        db.commit() 
+        db.commit()
         flash("Venue added successfully.")
-        return redirect(url_for("index"))
-    return render_template("add_venue.html")
+        return redirect(url_for("add_venue"))
+    venues_cur = db.execute("SELECT * FROM venue ORDER BY name")
+    venues = venues_cur.fetchall()
+    return render_template("add_venue.html", venues=venues)
 
 @app.route("/venues")
 @login_required

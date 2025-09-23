@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Venue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #a8d8ff, #fff5ba);
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 24px rgba(127,90,240,0.12);
+      padding: 32px 28px;
+      width: 340px;
+      text-align: center;
+      position: relative;
+    }
+    h2 {
+      color: #7f5af0;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px 0;
+      font-weight: 500;
+      color: #333;
+      text-align: left;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      background: linear-gradient(90deg, #f6c1e4, #c1c8f6);
+      border: none;
+      border-radius: 12px;
+      padding: 10px 24px;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+    button:hover {
+      box-shadow: 0 4px 15px rgba(246,193,228,0.3);
+      transform: scale(1.04);
+    }
+    .venue-list-btn {
+      background: linear-gradient(90deg, #c1c8f6, #f6c1e4);
+      margin-top: 18px;
+    }
+    .back-link {
+      display: block;
+      margin-top: 18px;
+      color: #7f5af0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #d9534f;
+    }
+    /* Centered popup notification */
+    .popup-notif {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #7f5af0;
+      color: #fff;
+      padding: 18px 38px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(127,90,240,0.18);
+      font-size: 18px;
+      font-weight: 600;
+      z-index: 9999;
+      display: none;
+      animation: fadeIn 0.4s;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -60%);}
+      to { opacity: 1; transform: translate(-50%, -50%);}
+    }
+    /* Venue list modal */
+    .modal-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 24px rgba(127,90,240,0.16);
+      padding: 28px 32px;
+      min-width: 320px;
+      max-width: 90vw;
+      text-align: left;
+      position: relative;
+      animation: fadeIn 0.3s;
+    }
+    .modal h3 {
+      color: #7f5af0;
+      margin-bottom: 16px;
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .venue-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .venue-list li {
+      background: #f6c1e4;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #333;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(127,90,240,0.07);
+    }
+    .venue-list .location {
+      font-size: 13px;
+      color: #7f5af0;
+      margin-left: 10px;
+      font-weight: 400;
+    }
+    .close-modal-btn {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      background: #ff6b6b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .close-modal-btn:hover {
+      background: #d9534f;
+    }
+  </style>
+</head>
+<body>
+  <!-- Centered popup notification -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="popup-notif" id="popupNotif">
+        {{ messages[0] }}
+      </div>
+      <script>
+        document.getElementById('popupNotif').style.display = 'block';
+        setTimeout(function() {
+          document.getElementById('popupNotif').style.display = 'none';
+        }, 2000);
+      </script>
+    {% endif %}
+  {% endwith %}
+  <div class="card">
+    <h2>Add Venue</h2>
+    <form method="post">
+      <label for="name">Venue Name</label>
+      <input type="text" id="name" name="name" required>
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" required>
+      <button type="submit">Add Venue</button>
+    </form>
+    <button class="venue-list-btn" id="showVenueList">Venue List</button>
+    <a class="back-link" href="{{ url_for('index') }}">&#8592; Back to Home</a>
+  </div>
+  <!-- Venue List Modal -->
+  <div class="modal-bg" id="venueModalBg">
+    <div class="modal">
+      <button class="close-modal-btn" id="closeVenueModal">Close</button>
+      <h3>Venue List</h3>
+      <ul class="venue-list">
+        {% for venue in venues %}
+          <li>
+            <span>{{ venue.name }}</span>
+            <span class="location">{{ venue.location }}</span>
+          </li>
+        {% else %}
+          <li>No venues found.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <script>
+    // Venue List Modal logic
+    document.getElementById('showVenueList').onclick = function() {
+      document.getElementById('venueModalBg').style.display = 'flex';
+    };
+    document.getElementById('closeVenueModal').onclick = function() {
+      document.getElementById('venueModalBg').style.display = 'none';
+    };
+    // Optional: close modal when clicking outside
+    document.getElementById('venueModalBg').onclick = function(e) {
+      if (e.target === this) this.style.display = 'none';
+    };
+  </script>
+</body>
+</html>

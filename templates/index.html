@@ -50,12 +50,41 @@
       font-size: 14px;
     }
 
+    .calendar-wrapper {
+      max-width: 700px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .month-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 28px; /* add more space below month title */
+    }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 8px;
+      margin-top: 10px; /* add space above calendar header */
+      font-weight: bold;
+      color: #7f5af0;
+      text-align: center;
+      font-size: 16px;
+      /* Remove background and border for seamless look */
+      background: none;
+      border-radius: 0;
+      padding: 0;
+    }
     .calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 10px;
       max-width: 700px;
-      margin: 20px auto;
+      margin: 0 auto;
     }
 
     .day {
@@ -74,6 +103,14 @@
       background: #f6c1e4;
       color: white;
       transform: scale(1.05);
+    }
+
+    .day.sunday {
+      background: #ffd6d6 !important;
+      color: #d9534f !important;
+      cursor: not-allowed;
+      opacity: 0.7;
+      position: relative;
     }
 
     .vacant {
@@ -100,15 +137,6 @@
     button:hover {
       transform: scale(1.05);
       box-shadow: 0 4px 15px rgba(246,193,228,0.6);
-    }
-
-    .month-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-top: 15px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
     }
 
     /* Popup */
@@ -182,7 +210,18 @@
     <button id="nextMonth">></button>
   </div>
 
-  <div class="calendar" id="calendar"></div>
+  <div class="calendar-wrapper">
+    <div class="calendar-header">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    <div class="calendar" id="calendar"></div>
+  </div>
 
   <!-- Booking Popup -->
   <div class="popup" id="popup">
@@ -240,6 +279,15 @@
       monthTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0=Sunday
+
+      // Fill empty cells before first day (to align dates with weekday header)
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "day";
+        emptyDiv.style.visibility = "hidden";
+        calendar.appendChild(emptyDiv);
+      }
 
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
@@ -247,33 +295,52 @@
         div.className = "day vacant";
         div.textContent = day;
 
-        if (bookings[venue] && bookings[venue][dateStr]) {
-          div.className = "day occupied";
-          div.title = `${venue} - ${bookings[venue][dateStr]}`;
+        // Calculate the day of week for this date
+        const weekDay = new Date(currentYear, currentMonth, day).getDay();
+
+        // Sunday: just color, no label
+        if (weekDay === 0) {
+          div.className += " sunday";
+          div.title = "Sunday";
+          div.onclick = null;
+        } else {
+          if (bookings[venue] && bookings[venue][dateStr]) {
+            div.className = "day occupied";
+            div.title = `${venue} - ${bookings[venue][dateStr]}`;
+          }
+          // Click event to show booking details
+          div.onclick = () => {
+            const popup = document.getElementById("popup");
+            const popupContent = document.getElementById("popupContent");
+            popup.style.display = "flex";
+
+            // Show details instead of new booking form
+            popupContent.innerHTML = `
+              <h2>Booking Details</h2>
+              <p><b>Venue:</b> ${venue}</p>
+              <p><b>Date:</b> ${dateStr}</p>
+              <p><b>Status:</b> ${bookings[venue][dateStr] || "Vacant"}</p>
+              <button class="close-btn" id="closePopup">Close</button>
+            `;
+
+            document.getElementById("closePopup").onclick = () => {
+              popup.style.display = "none";
+              resetPopupContent(); // restore form
+            };
+          };
         }
 
-        // Click event to show booking details
-        div.onclick = () => {
-          const popup = document.getElementById("popup");
-          const popupContent = document.getElementById("popupContent");
-          popup.style.display = "flex";
-
-          // Show details instead of new booking form
-          popupContent.innerHTML = `
-            <h2>Booking Details</h2>
-            <p><b>Venue:</b> ${venue}</p>
-            <p><b>Date:</b> ${dateStr}</p>
-            <p><b>Status:</b> ${bookings[venue][dateStr] || "Vacant"}</p>
-            <button class="close-btn" id="closePopup">Close</button>
-          `;
-
-          document.getElementById("closePopup").onclick = () => {
-            popup.style.display = "none";
-            resetPopupContent(); // restore form
-          };
-        };
-
         calendar.appendChild(div);
+      }
+
+      // Fill empty cells after last day to complete the last week row
+      const totalCells = firstDay + daysInMonth;
+      const remaining = (7 - (totalCells % 7)) % 7;
+      for (let i = 0; i < remaining; i++) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "day";
+        emptyDiv.style.visibility = "hidden";
+        calendar.appendChild(emptyDiv);
       }
     }
 
