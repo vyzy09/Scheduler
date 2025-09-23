@@ -1,37 +1,302 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Your Schedule</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scheduler</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Sacramento&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #a8d8ff, #fff5ba);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
 
-<section class="add-form">
-  <form method="post" action="{{ url_for('add') }}">
-    <input name="title" placeholder="Task title" required>
-    <input type="date" name="date">
-    <input type="time" name="time">
-    <input name="notes" placeholder="Notes (optional)">
-    <button type="submit">Add</button>
-  </form>
-</section>
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.6;
+      z-index: -1;
+    }
+    .blob1 { width: 300px; height: 300px; background: #f6c1e4; top: -60px; left: -60px; }
+    .blob2 { width: 250px; height: 250px; background: #c1c8f6; bottom: -80px; right: -40px; }
 
-<section class="tasks">
-  {% if tasks %}
-    <ul>
-      {% for t in tasks %}
-        <li>
-          <strong>{{ t["title"] }}</strong>
-          {% if t["date"] %} — {{ t["date"] }}{% endif %}
-          {% if t["time"] %} at {{ t["time"] }}{% endif %}
-          {% if t["notes"] %}<div class="notes">{{ t["notes"] }}</div>{% endif %}
-          <div class="actions">
-            <form method="post" action="{{ url_for('delete', task_id=t['id']) }}" style="display:inline;">
-              <button type="submit" onclick="return confirm('Delete this task?')">Delete</button>
-            </form>
-            <a href="{{ url_for('edit', task_id=t['id']) }}">Edit</a>
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No tasks yet.</p>
-  {% endif %}
-</section>
-{% endblock %}
+    h1 {
+      font-family: 'Sacramento', cursive;
+      font-size: 48px;
+      color: #7f5af0;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    select, input {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      max-width: 700px;
+      margin: 20px auto;
+    }
+
+    .day {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      font-weight: 600;
+      color: #333;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .day:hover {
+      background: #f6c1e4;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .vacant {
+      background: #c1f6d6;
+      color: #2d6a4f;
+    }
+
+    .occupied {
+      background: #f6c1c1;
+      color: #6a2d2d;
+    }
+
+    button {
+      background: linear-gradient(90deg, #f6c1e4, #c1c8f6);
+      border: none;
+      border-radius: 15px;
+      padding: 10px 20px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(246,193,228,0.6);
+    }
+
+    .month-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* Booking popup */
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .popup h2 {
+      margin-bottom: 15px;
+      color: #7f5af0;
+    }
+
+    .popup select, .popup input {
+      margin: 8px 0;
+      width: 90%;
+    }
+
+    .close-btn {
+      background: #ff6b6b;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .warning {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #d9534f;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <h1>📅 Scheduler</h1>
+
+  <div class="controls">
+    <label for="venue">Choose a venue:</label>
+    <select id="venue">
+      <option>Gymnasium</option>
+      <option>Auditorium</option>
+      <option>Conference Room</option>
+      <option>Computer Lab</option>
+    </select>
+    <button id="openPopup">Add Booking</button>
+  </div>
+
+  <div class="month-title">
+    <button id="prevMonth">⏮</button>
+    <span id="monthTitle"></span>
+    <button id="nextMonth">⏭</button>
+  </div>
+
+  <div class="calendar" id="calendar"></div>
+
+  <!-- Booking Popup -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <h2>New Booking</h2>
+      <label>Venue:</label>
+      <select id="popupVenue">
+        <option>Gymnasium</option>
+        <option>Auditorium</option>
+        <option>Conference Room</option>
+        <option>Computer Lab</option>
+      </select><br>
+      <label>Date:</label>
+      <input type="date" id="popupDate"><br>
+      <label>Time:</label>
+      <select id="popupTime">
+        <option>Whole Day</option>
+        <option>Morning</option>
+        <option>Afternoon</option>
+      </select><br>
+      <div id="suggestion" class="warning"></div>
+      <button id="saveBooking">Save</button>
+      <button class="close-btn" id="closePopup">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Example bookings per venue
+    const bookings = {
+      "Gymnasium": {
+        "2025-09-05": "Whole Day",
+        "2025-09-12": "Morning"
+      },
+      "Auditorium": {
+        "2025-09-06": "Afternoon"
+      },
+      "Conference Room": {
+        "2025-09-10": "Whole Day"
+      },
+      "Computer Lab": {}
+    };
+
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    function generateCalendar() {
+      const calendar = document.getElementById("calendar");
+      const monthTitle = document.getElementById("monthTitle");
+      calendar.innerHTML = "";
+
+      const venue = document.getElementById("venue").value;
+      const monthNames = [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+      ];
+      monthTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+        const div = document.createElement("div");
+        div.className = "day vacant";
+        div.textContent = day;
+
+        if (bookings[venue] && bookings[venue][dateStr]) {
+          div.className = "day occupied";
+          div.title = `${venue} - ${bookings[venue][dateStr]}`;
+        }
+
+        calendar.appendChild(div);
+      }
+    }
+
+    // Popup handling
+    const popup = document.getElementById("popup");
+    document.getElementById("openPopup").onclick = () => popup.style.display = "flex";
+    document.getElementById("closePopup").onclick = () => popup.style.display = "none";
+
+    document.getElementById("popupDate").onchange = () => {
+      const date = document.getElementById("popupDate").value;
+      const venue = document.getElementById("popupVenue").value;
+      const suggestion = document.getElementById("suggestion");
+
+      if (bookings[venue] && bookings[venue][date]) {
+        suggestion.textContent = `⚠️ Already booked (${bookings[venue][date]})`;
+      } else {
+        suggestion.textContent = "";
+      }
+    };
+
+    // Venue change updates calendar
+    document.getElementById("venue").onchange = generateCalendar;
+
+    // Month navigation
+    document.getElementById("prevMonth").onclick = () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      generateCalendar();
+    };
+
+    document.getElementById("nextMonth").onclick = () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      generateCalendar();
+    };
+
+    generateCalendar();
+  </script>
+</body>
+</html>
