@@ -57,6 +57,17 @@ def init_db():
         location TEXT NOT NULL
     )
     """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS booking (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_name TEXT NOT NULL,
+        venue_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        time_in TEXT NOT NULL,
+        time_out TEXT NOT NULL,
+        FOREIGN KEY(venue_id) REFERENCES venue(id)
+    )
+    """)
     db.commit()
     db.close()
 
