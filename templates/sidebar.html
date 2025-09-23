@@ -1,9 +1,155 @@
-<div class="sidebar" style="position:fixed;left:0;top:0;width:220px;height:100%;background:#f6c1e4;padding:30px 15px;box-shadow:2px 0 10px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:25px;">
-  <div style="margin-bottom:30px;">
-    <strong>User:</strong> {{ user.username }}
-  </div>
-  <a href="{{ url_for('index') }}">Profile</a>
-  <a href="{{ url_for('add_venue') }}">Add Venue</a>
-  <a href="#">Settings</a>
-  <a href="{{ url_for('logout') }}">Log out</a>
+<!-- Sidebar Toggle Button -->
+<button
+  id="sidebarToggle"
+  style="
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 1001;
+    background: #fff;
+    color: #3a4256;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(58,66,86,0.10);
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  "
+  onmouseover="this.style.background='#e3e7ef';this.style.color='#1a2236';this.style.boxShadow='0 4px 16px rgba(58,66,86,0.18)';"
+  onmouseout="this.style.background='#fff';this.style.color='#3a4256';this.style.boxShadow='0 2px 8px rgba(58,66,86,0.10)';"
+>
+  <span style="font-size:1.3em;">&#9776;</span>
+</button>
+
+<!-- Sidebar Drawer -->
+<div
+  id="sidebarDrawer"
+  class="sidebar"
+  style="
+    position: fixed;
+    left: -270px;
+    top: 0;
+    width: 250px;
+    height: 100%;
+    background: linear-gradient(135deg, #a7c7e7 60%, #ffe082 100%);
+    /* Blue and yellow gradient */
+    padding: 48px 28px 32px 28px;
+    box-shadow: 2px 0 24px rgba(185, 79, 198, 0.13);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    transition: left 0.3s;
+    z-index: 1000;
+    border-top-right-radius: 22px;
+    border-bottom-right-radius: 22px;
+    justify-content: center;
+    align-items: stretch;
+    border-right: 2px solid #e9a9d6;
+  "
+>
+  <a
+    href="{{ url_for('index') }}"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #7a2f8c;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: rgba(246, 193, 228, 0.12);
+      font-weight: 600;
+      font-size: 1.08em;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 4px rgba(185, 79, 198, 0.04);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    "
+    onmouseover="this.style.background='#f6c1e4';this.style.color='#b94fc6';this.style.boxShadow='0 2px 8px rgba(185,79,198,0.13)';"
+    onmouseout="this.style.background='rgba(246, 193, 228, 0.12)';this.style.color='#7a2f8c';this.style.boxShadow='0 1px 4px rgba(185,79,198,0.04)';"
+    ><span style="font-size: 1.2em">🏠</span>Profile</a
+  >
+  <a
+    href="{{ url_for('add_venue') }}"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #7a2f8c;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: rgba(246, 193, 228, 0.12);
+      font-weight: 600;
+      font-size: 1.08em;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 4px rgba(185, 79, 198, 0.04);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    "
+    onmouseover="this.style.background='#f6c1e4';this.style.color='#b94fc6';this.style.boxShadow='0 2px 8px rgba(185,79,198,0.13)';"
+    onmouseout="this.style.background='rgba(246, 193, 228, 0.12)';this.style.color='#7a2f8c';this.style.boxShadow='0 1px 4px rgba(185,79,198,0.04)';"
+    ><span style="font-size: 1.2em">➕</span>Add Venue</a
+  >
+  <a
+    href="#"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #7a2f8c;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: rgba(246, 193, 228, 0.12);
+      font-weight: 600;
+      font-size: 1.08em;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 4px rgba(185, 79, 198, 0.04);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    "
+    onmouseover="this.style.background='#f6c1e4';this.style.color='#b94fc6';this.style.boxShadow='0 2px 8px rgba(185,79,198,0.13)';"
+    onmouseout="this.style.background='rgba(246, 193, 228, 0.12)';this.style.color='#7a2f8c';this.style.boxShadow='0 1px 4px rgba(185,79,198,0.04)';"
+    ><span style="font-size: 1.2em">🛠️</span>Settings</a
+  >
+  <a
+    href="{{ url_for('logout') }}"
+    style="
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #b94fc6 60%, #f6c1e4 100%);
+      font-weight: 600;
+      font-size: 1.08em;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 8px rgba(185, 79, 198, 0.1);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    "
+    onmouseover="this.style.background='#fbe7f6';this.style.color='#b94fc6';this.style.boxShadow='0 2px 12px rgba(185,79,198,0.18)';"
+    onmouseout="this.style.background='linear-gradient(90deg, #b94fc6 60%, #f6c1e4 100%)';this.style.color='#fff';this.style.boxShadow='0 1px 8px rgba(185,79,198,0.10)';"
+    ><span style="font-size: 1.2em">⏻</span>Log out</a
+  >
 </div>
+
+<script>
+  const sidebar = document.getElementById("sidebarDrawer");
+  const toggleBtn = document.getElementById("sidebarToggle");
+  let sidebarOpen = false;
+
+  toggleBtn.onclick = function () {
+    sidebarOpen = !sidebarOpen;
+    sidebar.style.left = sidebarOpen ? "0" : "-270px";
+  };
+
+  document.addEventListener("click", function (e) {
+    if (sidebarOpen && !sidebar.contains(e.target) && e.target !== toggleBtn) {
+      sidebar.style.left = "-270px";
+      sidebarOpen = false;
+    }
+  });
+</script>
+</script>
