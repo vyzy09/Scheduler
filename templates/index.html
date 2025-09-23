@@ -160,18 +160,18 @@
   </style>
 </head>
 <body>
+  {% include 'sidebar.html' %}
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
 
   <h1>📅 Schedy</h1>
 
   <div class="controls">
-    <label for="venue">Choose a venue:</label>
+    <label for="venue">Venue:</label>
     <select id="venue">
-      <option>Gymnasium</option>
-      <option>Cafet Hall</option>
-      <option>PAT AVR</option>
-      <option>ICT AVR</option>
+      {% for venue in venues %}
+        <option>{{ venue.name }}</option>
+      {% endfor %}
     </select>
     <button id="openPopup">Add Booking</button>
   </div>
