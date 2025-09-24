@@ -224,46 +224,90 @@
   </div>
 
   <!-- Booking Popup -->
-  <div class="popup" id="popup">
-    <div class="popup-content" id="popupContent" style="padding:0;">
-      <div style="background:linear-gradient(90deg,#f6c1e4,#c1c8f6);border-radius:15px 15px 0 0;padding:18px 0;">
-        <h2 style="margin:0;color:#7f5af0;font-size:28px;font-weight:600;">Add Booking</h2>
-      </div>
-      <form id="bookingForm" style="padding:24px 24px 12px 24px;">
-        <label for="clientName" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Client Name</label>
-        <input type="text" id="clientName" name="clientName" required style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;box-sizing:border-box;">
-        <label for="bookingVenue" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Venue</label>
-        <select id="bookingVenue" name="bookingVenue" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
-          {% for venue in venues %}
-            <option value="{{ venue.id }}">{{ venue.name }}</option>
-          {% endfor %}
-        </select>
-        <label for="bookingDate" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Date</label>
-        <input type="date" id="bookingDate" name="bookingDate" required style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;box-sizing:border-box;">
-        <div style="display:flex;gap:12px;">
-          <div style="flex:1;">
-            <label for="timeIn" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Time In</label>
-            <select id="timeIn" name="timeIn" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
-              {% for hour in range(8, 22) %}
-                <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div style="flex:1;">
-            <label for="timeOut" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Time Out</label>
-            <select id="timeOut" name="timeOut" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
-              {% for hour in range(8, 22) %}
-                <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div id="suggestion" class="warning" style="margin-bottom:10px;"></div>
-        <button type="submit" id="saveBooking" style="background:linear-gradient(90deg,#f6c1e4,#c1c8f6);border:none;border-radius:12px;padding:10px 24px;color:white;font-weight:bold;font-size:15px;cursor:pointer;margin-top:8px;transition:0.2s;">Save</button>
-        <button type="button" class="close-btn" id="closePopup" style="background:#ff6b6b;margin-top:10px;">Close</button>
-      </form>
+<div class="popup" id="popup">
+  <div class="popup-content" id="popupContent" style="padding:0;">
+    <div style="background:linear-gradient(90deg,#f6c1e4,#c1c8f6);border-radius:15px 15px 0 0;padding:18px 0;">
+      <h2 style="margin:0;color:#7f5af0;font-size:28px;font-weight:600;">Add Booking</h2>
     </div>
+    <form id="bookingForm" style="padding:24px 24px 12px 24px;">
+      <label for="clientName" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Client Name</label>
+      <input type="text" id="clientName" name="clientName" required style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;box-sizing:border-box;">
+
+      <label for="bookingVenue" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Venue</label>
+      <select id="bookingVenue" name="bookingVenue" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
+        {% for venue in venues %}
+          <option value="{{ venue.id }}">{{ venue.name }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="bookingDate" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Date</label>
+      <input type="date" id="bookingDate" name="bookingDate" required style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;box-sizing:border-box;">
+
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;">
+          <label for="timeIn" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Time In</label>
+          <select id="timeIn" name="timeIn" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
+            {% for hour in range(8, 22) %}
+              <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label for="timeOut" style="display:block;margin-bottom:6px;font-weight:500;color:#333;text-align:left;">Time Out</label>
+          <select id="timeOut" name="timeOut" required style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid #ccc;font-size:15px;margin-bottom:14px;">
+            {% for hour in range(8, 22) %}
+              <option value="{{ "%02d:00" % hour }}">{{ "%02d:00" % hour }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div id="suggestion" class="warning" style="margin-bottom:10px;"></div>
+
+      <button type="submit" id="saveBooking" style="background:linear-gradient(90deg,#f6c1e4,#c1c8f6);border:none;border-radius:12px;padding:10px 24px;color:white;font-weight:bold;font-size:15px;cursor:pointer;margin-top:8px;transition:0.2s;">Save</button>
+      <button type="button" class="close-btn" id="closePopup" style="background:#ff6b6b;margin-top:10px;">Close</button>
+    </form>
   </div>
+</div>
+
+  <!-- Booking Script -->
+  <script>
+  document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+      client_name: document.getElementById("clientName").value,
+      bookingVenue: document.getElementById("bookingVenue").value,
+      bookingDate: document.getElementById("bookingDate").value,
+      timeIn: document.getElementById("timeIn").value,
+      timeOut: document.getElementById("timeOut").value
+    };
+
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.message);
+
+      if (result.success) {
+        // close popup and reset form
+        document.getElementById("bookingForm").reset();
+        document.getElementById("popup").style.display = "none";
+      }
+    } catch (err) {
+      alert("Error saving booking: " + err);
+    }
+  });
+
+  document.getElementById("closePopup").addEventListener("click", function() {
+    document.getElementById("popup").style.display = "none";
+  });
+  </script>
+
 
   <script>
     const bookings = {

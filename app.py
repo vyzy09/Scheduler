@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import os
+from flask import jsonify
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "scheduler.db")
@@ -166,6 +167,44 @@ def list_venues():
     cur = db.execute("SELECT * FROM venue ORDER BY name")
     venues = cur.fetchall()
     return render_template("venues.html", venues=venues)
+
+@app.route("/api/bookings", methods=["POST"])
+@login_required
+def api_bookings():
+    data = request.get_json()
+    client_name = data.get("client_name", "")
+    venue_id = data.get("bookingVenue")
+    booking_date = data.get("bookingDate")
+    time_in = data.get("timeIn")
+    time_out = data.get("timeOut")
+
+    if not client_name or not venue_id or not booking_date or not time_in or not time_out:
+        return jsonify({"success": False, "message": "Missing fields"}), 400
+
+    db = get_db()
+    db.execute(
+        "INSERT INTO booking (client_name, venue_id, date, time_in, time_out) VALUES (?, ?, ?, ?, ?)",
+        (client_name, venue_id, booking_date, time_in, time_out)
+    )
+    db.commit()
+    return jsonify({"success": True, "message": "Booking saved!"})
+
+@app.route("/api/bookings/<int:venue_id>", methods=["GET"])
+@login_required
+def get_bookings(venue_id):
+    db = get_db()
+    rows = db.execute("SELECT * FROM booking WHERE venue_id = ?", (venue_id,)).fetchall()
+
+    bookings = {}
+    for row in rows:
+        bookings[row["date"]] = {
+            "client_name": row["client_name"],
+            "time_in": row["time_in"],
+            "time_out": row["time_out"]
+        }
+
+    return jsonify(bookings)
+
 
 @app.route("/logout")
 @login_required
